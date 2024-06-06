@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
-from helpers.text import delete_accented_chars
+from helpers.text import delete_accented_chars, delete_spanish_letters, delete_spaces
 
 class Preprocessing:
   encoder = None
@@ -18,5 +18,27 @@ class Preprocessing:
     encoded_age = self.encoder.fit_transform(df_preprocessed[['age']])
     encoded_df = pd.DataFrame(encoded_age, columns=self.encoder.get_feature_names_out(['age']))
     df_preprocessed = pd.concat([df_preprocessed.drop(columns=['age']), encoded_df], axis=1)
+    # Preprocess text
+    text = df_preprocessed['question_1'].iloc[0]
+    text_preprocessed = self.preprocess_text(text)
+    print(f'Original text: {text}')
+    print(f'Preprocessed text: {text_preprocessed}')
     return df_preprocessed
   
+  def preprocess_text(self, text):
+    """
+    Preprocesses the given text by converting it to lowercase, deleting accented characters,
+    deleting Spanish letters, and deleting spaces.
+
+    Args:
+      text (str): The text to be preprocessed.
+
+    Returns:
+      str: The preprocessed text.
+    """
+    text_preprocessed = text.lower()
+    text_preprocessed = delete_accented_chars(text_preprocessed)
+    text_preprocessed = delete_spanish_letters(text_preprocessed)
+    text_preprocessed = delete_spaces(text_preprocessed)
+
+    return text_preprocessed
