@@ -10,7 +10,6 @@ def main():
   # instantiate Preprocessing class
   pp = Preprocessing.Preprocessing()
   df_preprocessed = pp.preprocess_dataframe(df)
-  print(df_preprocessed.head())
 
   # Export preprocessed dataframe to csv
   output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../output')
