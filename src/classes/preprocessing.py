@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
-from helpers.text import delete_accented_chars, delete_spanish_letters, delete_spaces, delete_not_vocabulary_words
+from helpers.text import delete_accented_chars, delete_spanish_letters, delete_spaces, delete_not_vocabulary_words, delete_emojis
 
 class Preprocessing:
   encoder = None
@@ -41,5 +41,5 @@ class Preprocessing:
     text_preprocessed = delete_spanish_letters(text_preprocessed)
     text_preprocessed = delete_spaces(text_preprocessed)
     text_preprocessed = delete_not_vocabulary_words(text_preprocessed)
-
+    text_preprocessed = delete_emojis(text_preprocessed)
     return text_preprocessed
