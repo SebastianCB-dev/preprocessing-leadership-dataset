@@ -1,4 +1,5 @@
 import re
+import emoji
 
 def delete_accented_chars(text: str) -> str:
     """
@@ -62,4 +63,17 @@ def delete_not_vocabulary_words(text: str) -> str:
     text = text.lower()
     regex = re.compile(r'[^a-z\s]')
     text = re.sub(regex, '', text)
+    return text
+
+def delete_emojis(text: str) -> str:
+    """
+    Removes emojis from the given text.
+
+    Args:
+        text (str): The input text.
+
+    Returns:
+        str: The text with emojis removed.
+    """
+    text = emoji.replace_emoji(text, '')
     return text
