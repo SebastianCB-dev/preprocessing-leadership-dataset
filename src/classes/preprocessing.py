@@ -9,7 +9,7 @@ class Preprocessing:
     self.encoder = OneHotEncoder(sparse_output=False)
     pass
   
-  def preprocess_dataframe(self, df):
+  def preprocess_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
     df_preprocessed = df.copy()
     # Column working as true or false
     df_preprocessed['working'] = df_preprocessed['working'].astype('str').str.lower().apply(delete_accented_chars)
@@ -25,7 +25,7 @@ class Preprocessing:
     print(f'Preprocessed text: {text_preprocessed}')
     return df_preprocessed
   
-  def preprocess_text(self, text):
+  def preprocess_text(self, text: str) -> str:
     """
     Preprocesses the given text by converting it to lowercase, deleting accented characters,
     deleting Spanish letters, and deleting spaces.
