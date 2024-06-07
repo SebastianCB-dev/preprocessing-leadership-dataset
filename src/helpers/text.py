@@ -1,6 +1,6 @@
 import re
 
-def delete_accented_chars(text):
+def delete_accented_chars(text: str) -> str:
     """
     Removes accented characters from the given text and converts it to lowercase.
 
@@ -18,7 +18,7 @@ def delete_accented_chars(text):
     text = text.replace('ú', 'u')
     return text
 
-def delete_spanish_letters(text):
+def delete_spanish_letters(text: str) -> str:
     """
     Deletes Spanish letters from the given text.
 
@@ -32,7 +32,7 @@ def delete_spanish_letters(text):
     text.replace('ñ', 'n')
     return text
 
-def delete_spaces(text):
+def delete_spaces(text: str) -> str:
     """
     Deletes spaces from the given text.
 
