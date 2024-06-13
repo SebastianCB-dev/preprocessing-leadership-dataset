@@ -1,5 +1,9 @@
 import re
 import emoji
+import stanza
+
+stanza.download('es', package='ancora', processors='tokenize,mwt,pos,lemma', verbose=True)
+stNLP = stanza.Pipeline(lang='es', processors='tokenize,mwt,pos,lemma', use_gpu=True)
 
 def delete_accented_chars(text: str) -> str:
     """
@@ -77,3 +81,23 @@ def delete_emojis(text: str) -> str:
     """
     text = emoji.replace_emoji(text, '')
     return text
+
+def lemma(words: list[str]) -> list[str]:
+    """
+    Apply lemmatization to a list of words.
+
+    Args:
+        words (list[str]): The list of words to be lemmatized.
+
+    Returns:
+        list[str]: The lemmatized words.
+    """
+    new_words = []
+    for word in words:
+        result = stNLP(word)
+        new_words.append(
+            [word.lemma for sent in result.sentences for word in sent.words][0]
+        )
+    return new_words
+
+   
