@@ -7,7 +7,7 @@ This is a repository for the leadership dataset. The dataset is in the folder `d
 > The pip version used is 24.0
 
 > [!NOTE]  
-> If you have a problem with the program, please contact me at [email](mailto:carrillobaronj@gmail.com)
+> If you have a problem with the scripts, please contact me at [email](mailto:carrillobaronj@gmail.com)
 
 ## Set Up
 
