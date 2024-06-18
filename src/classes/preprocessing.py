@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
-from helpers.text import delete_accented_chars, delete_spanish_letters, delete_spaces, delete_not_vocabulary_words, delete_emojis, lemma
+from helpers.text import delete_accented_chars, delete_spanish_letters, delete_spaces, delete_not_vocabulary_words, delete_emojis, lemma, delete_stop_words
 
 class Preprocessing:
   encoder = None
@@ -44,5 +44,6 @@ class Preprocessing:
     text_preprocessed = delete_emojis(text_preprocessed)
     text_words = text_preprocessed.split(' ')
     words_preprocessed = lemma(text_words)
+    words_tokenized = delete_stop_words(words_preprocessed)
 
-    return words_preprocessed
+    return words_tokenized
