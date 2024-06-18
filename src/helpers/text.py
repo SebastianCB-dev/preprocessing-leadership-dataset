@@ -1,9 +1,12 @@
 import re
 import emoji
 import stanza
+import spacy
 
 stanza.download('es', package='ancora', processors='tokenize,mwt,pos,lemma', verbose=True)
 stNLP = stanza.Pipeline(lang='es', processors='tokenize,mwt,pos,lemma', use_gpu=True)
+sp = spacy.load('es_core_news_md')
+stop_words = sp.Defaults.stop_words
 
 def delete_accented_chars(text: str) -> str:
     """
@@ -100,4 +103,16 @@ def lemma(words: list[str]) -> list[str]:
         )
     return new_words
 
+def delete_stop_words(words: list[str]) -> list[str]:
+    """
+    Removes stop words from a list of words.
+
+    Args:
+        words (list[str]): The list of words to remove stop words from.
+
+    Returns:
+        list[str]: The list of words without stop words.
+    """
+    tokens_without_stopwords = [word for word in words if not word in stop_words]
+    return tokens_without_stopwords
    
