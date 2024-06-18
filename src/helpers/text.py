@@ -116,3 +116,14 @@ def delete_stop_words(words: list[str]) -> list[str]:
     tokens_without_stopwords = [word for word in words if not word in stop_words]
     return tokens_without_stopwords
    
+def delete_duplicates(words: list[str]) -> list[str]:
+    """
+    Removes duplicate words from a list.
+
+    Args:
+        words (list[str]): A list of words.
+
+    Returns:
+        list[str]: A new list with duplicate words removed.
+    """
+    return list(set(words))
