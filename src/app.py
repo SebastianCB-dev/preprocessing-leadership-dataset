@@ -1,8 +1,12 @@
 import os
 import pandas as pd
+import os
+import nltk
 import classes.preprocessing as Preprocessing
+nltk.download('stopwords')
+nltk.download('punkt_tab')
 
-def main(): 
+def main():
   # read csv
   csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../assets/dataset-v1.csv')
   df = pd.read_csv(csv_path, sep=',', encoding='unicode_escape')

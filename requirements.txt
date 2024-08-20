@@ -1,7 +1,4 @@
 pandas==2.2.2
 scikit-learn==1.5.0
-emoji==2.12.1
-stanza==1.8.2
+nltk==3.8.1
 spacy==3.7.5
-
-https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.7.0/es_core_news_md-3.7.0.tar.gz#egg=es_core_news_md==3.7.0

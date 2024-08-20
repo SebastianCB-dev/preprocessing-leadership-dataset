@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
-from helpers.text import delete_accented_chars, delete_spanish_letters, delete_spaces, delete_not_vocabulary_words, delete_emojis, lemma, delete_stop_words, delete_duplicates
+from helpers.text import preprocesar_texto, pasar_a_minusculas, eliminar_acentos_palabra
 import json
 
 class Preprocessing:
@@ -13,10 +13,12 @@ class Preprocessing:
   def preprocess_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
     df_preprocessed = df.copy()
     # Columna terminos y condiciones
-    df_preprocessed['terminos_y_condiciones'] = df_preprocessed['terminos_y_condiciones'].astype('str').str.lower().apply(delete_accented_chars)
+    df_preprocessed['terminos_y_condiciones'] = df_preprocessed['terminos_y_condiciones'].apply(pasar_a_minusculas)
+    df_preprocessed['terminos_y_condiciones'] = df_preprocessed['terminos_y_condiciones'].apply(eliminar_acentos_palabra)
     df_preprocessed['terminos_y_condiciones'] = df_preprocessed['terminos_y_condiciones'].apply(lambda x: 1 if x == 'si' else 0)
     # Columna esta trabajando
-    df_preprocessed['esta_trabajando'] = df_preprocessed['esta_trabajando'].astype('str').str.lower().apply(delete_accented_chars)
+    df_preprocessed['esta_trabajando'] = df_preprocessed['esta_trabajando'].apply(pasar_a_minusculas)
+    df_preprocessed['esta_trabajando'] = df_preprocessed['esta_trabajando'].apply(eliminar_acentos_palabra)
     df_preprocessed['esta_trabajando'] = df_preprocessed['esta_trabajando'].apply(lambda x: 1 if x == 'si' else 0)
     # One Hot Encoder for column age
     encoded_age = self.encoder.fit_transform(df_preprocessed[['rango_edad']])
@@ -29,33 +31,9 @@ class Preprocessing:
     # Preprocess text
     texts = df_preprocessed[['respuesta_1', 'respuesta_2', 'respuesta_3', 'respuesta_4', 'respuesta_5', 'respuesta_6', 'respuesta_7', 'respuesta_8']]
     for column in texts.columns:
-      df_preprocessed[column] = df_preprocessed[column].astype('str').apply(self.preprocess_text)
+      df_preprocessed[column] = df_preprocessed[column].astype('str').apply(preprocesar_texto)
 
     for i in range(1, 9):
       df_preprocessed[f'respuesta_{i}'] = df_preprocessed[f'respuesta_{i}'].apply(lambda x: json.dumps(x))
 
     return df_preprocessed
-
-  def preprocess_text(self, text: str) -> str:
-    """
-    Preprocesses the given text by converting it to lowercase, deleting accented characters,
-    deleting Spanish letters, and deleting spaces.
-
-    Args:
-      text (str): The text to be preprocessed.
-
-    Returns:
-      str: The preprocessed text.
-    """
-    text_preprocessed = str(text).lower()
-    text_preprocessed = delete_accented_chars(text_preprocessed)
-    text_preprocessed = delete_spanish_letters(text_preprocessed)
-    text_preprocessed = delete_spaces(text_preprocessed)
-    text_preprocessed = delete_not_vocabulary_words(text_preprocessed)
-    text_preprocessed = delete_emojis(text_preprocessed)
-    text_words = text_preprocessed.split(' ')
-    words_preprocessed = lemma(text_words)
-    words_tokenized = delete_stop_words(words_preprocessed)
-    words_cleaned = delete_duplicates(words_tokenized)
-
-    return words_cleaned
