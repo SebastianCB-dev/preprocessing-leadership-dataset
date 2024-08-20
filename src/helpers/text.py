@@ -18,7 +18,6 @@ def delete_accented_chars(text: str) -> str:
     Returns:
         str: The text with accented characters removed and converted to lowercase.
     """
-    text = text.lower()
     text = text.replace('á', 'a')
     text = text.replace('é', 'e')
     text = text.replace('í', 'i')
@@ -36,7 +35,6 @@ def delete_spanish_letters(text: str) -> str:
     Returns:
         str: The text with Spanish letters removed.
     """
-    text = text.lower()
     text.replace('ñ', 'n')
     return text
 
@@ -95,12 +93,16 @@ def lemma(words: list[str]) -> list[str]:
     Returns:
         list[str]: The lemmatized words.
     """
+    if len(words) == 0:
+        return words
     new_words = []
     for word in words:
         result = stNLP(word)
-        new_words.append(
-            [word.lemma for sent in result.sentences for word in sent.words][0]
-        )
+        res = [word.lemma for sent in result.sentences for word in sent.words]
+        if len(res) == 0:
+            new_words.append(word)
+        else:
+            new_words.append(res[0])
     return new_words
 
 def delete_stop_words(words: list[str]) -> list[str]:
@@ -113,9 +115,11 @@ def delete_stop_words(words: list[str]) -> list[str]:
     Returns:
         list[str]: The list of words without stop words.
     """
+    if len(words) == 0:
+        return words
     tokens_without_stopwords = [word for word in words if not word in stop_words]
     return tokens_without_stopwords
-   
+
 def delete_duplicates(words: list[str]) -> list[str]:
     """
     Removes duplicate words from a list.
@@ -126,4 +130,6 @@ def delete_duplicates(words: list[str]) -> list[str]:
     Returns:
         list[str]: A new list with duplicate words removed.
     """
+    if len(words) == 0:
+        return words
     return list(set(words))

@@ -5,7 +5,7 @@ import classes.preprocessing as Preprocessing
 def main(): 
   # read csv
   csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../assets/dataset-v1.csv')
-  df = pd.read_csv(csv_path, sep=',', encoding='utf-8')
+  df = pd.read_csv(csv_path, sep=',', encoding='unicode_escape')
 
   # instantiate Preprocessing class
   pp = Preprocessing.Preprocessing()
