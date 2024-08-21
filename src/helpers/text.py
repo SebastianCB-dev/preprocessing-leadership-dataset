@@ -1,135 +1,120 @@
 import re
-import emoji
-import stanza
+from nltk.corpus import stopwords
 import spacy
 
-stanza.download('es', package='ancora', processors='tokenize,mwt,pos,lemma', verbose=True)
-stNLP = stanza.Pipeline(lang='es', processors='tokenize,mwt,pos,lemma', use_gpu=True)
-sp = spacy.load('es_core_news_md')
-stop_words = sp.Defaults.stop_words
+stopwords_es = set(stopwords.words('spanish'))
+stopwords_en = set(stopwords.words('english'))
+nlp = spacy.load('assets/nlp_spacy/es_core_news_lg-3.1.0/es_core_news_lg/es_core_news_lg-3.1.0/')
 
-def delete_accented_chars(text: str) -> str:
-    """
-    Removes accented characters from the given text and converts it to lowercase.
+# Función principal para preprocesar texto
+def preprocesar_texto(texto: str) -> list[str]:
+  nuevo_texto = pasar_a_minusculas(texto)
+  tokens = tokenizar_texto(nuevo_texto)
+  tokens = eliminar_ruido(tokens)
+  tokens = reducir_palabras_extendidas(tokens)
+  tokens = eliminar_stopwords(tokens)
+  tokens = limitar_caracteres(tokens)
+  tokens = eliminar_espacios(tokens)
+  tokens = lematizar_tokens(tokens)
+  return tokens
 
-    Args:
-        text (str): The input text.
+# Paso 1: Convertir el texto a minúsculas
+def pasar_a_minusculas(texto: str) -> str:
+  texto_str = str(texto)
+  return texto_str.lower()
 
-    Returns:
-        str: The text with accented characters removed and converted to lowercase.
-    """
-    text = text.replace('á', 'a')
-    text = text.replace('é', 'e')
-    text = text.replace('í', 'i')
-    text = text.replace('ó', 'o')
-    text = text.replace('ú', 'u')
-    return text
+# Paso 2: Tokenizar el texto
+# Ejemplo: "Hola, ¿cómo estás?" -> ["Hola,", "¿cómo", "estás?"]
+def tokenizar_texto(texto: str) -> list[str]:
+  texto_tokenizado = texto.split(' ')
+  texto_tokenizado = limpiar_tokens(texto_tokenizado)
+  texto_tokenizado_limpio = eliminar_ruido(texto_tokenizado)
+  texto_tokenizado_limpio = reducir_palabras_extendidas(texto_tokenizado_limpio)
+  return texto_tokenizado_limpio
 
-def delete_spanish_letters(text: str) -> str:
-    """
-    Deletes Spanish letters from the given text.
+# Paso 3: Eliminar ruido como URLs, menciones y hashtags
+# Ejemplo: ["Hola,"@sebastian, "http://www.google.com", "#InteligenciaArtificial", "¿cómo", "estás?"] -> ["Hola,", "¿cómo", "estás?"]
+def eliminar_ruido(tokens: list[str]) -> list[str]:
+  if len(tokens) == 0: return []
+  # Eliminar URLs
+  lista_limpia = []
+  for token in tokens:
+    if not token.startswith('http'):
+      lista_limpia.append(token)
+  # Eliminar Hashtags
+  lista_limpia = [token for token in lista_limpia if not token.startswith('#')]
+  # Eliminar menciones
+  lista_limpia = [token for token in lista_limpia if not token.startswith('@')]
+  return lista_limpia
 
-    Args:
-        text (str): The input text.
+# Paso 4: Reducir palabras extendidas
+# Ejemplo: ["Holaaaa"] -> ["Hola"]
+def reducir_palabras_extendidas(tokens: list[str]) -> list[str]:
+  if len(tokens) == 0: return []
+  for i in range(len(tokens)):
+    tokens[i] = re.sub(r'(.)\1{2,}', r'\1\1', tokens[i])
+  return tokens
 
-    Returns:
-        str: The text with Spanish letters removed.
-    """
-    text.replace('ñ', 'n')
-    return text
+# Paso 5: Eliminar stopwords
+def eliminar_stopwords(tokens: list[str]) -> list[str]:
+  if len(tokens) == 0: return []
+  tokens_limpio = [token for token in tokens if token not in stopwords_es]
+  tokens_limpio = [token for token in tokens_limpio if token not in stopwords_en]
+  return tokens_limpio
 
-def delete_spaces(text: str) -> str:
-    """
-    Deletes spaces from the given text.
+# Paso 6: Limitar caracteres solo a letras
+def limitar_caracteres(tokens: list[str]) -> list[str]:
+  if len(tokens) == 0: return []
+  tokens_limpio = eliminar_acentos(tokens)
+  tokens_limpio = [re.sub(r'[^a-zA-Z]', '', token) for token in tokens_limpio]
+  tokens_limpio = limpiar_tokens(tokens_limpio)
+  return tokens_limpio
 
-    Args:
-        text (str): The input text.
+# Paso 7: Eliminar espacios en blanco adicionales
+def eliminar_espacios(tokens: list[str]) -> list[str]:
+  if len(tokens) == 0: return []
+  tokens_limpio = limpiar_tokens(tokens)
+  tokens_limpio = [token.strip() for token in tokens]
+  return tokens_limpio
 
-    Returns:
-        str: The text with spaces removed.
-    """
-    text_split = text.split(' ')
-    # filter removes empty strings
-    text_split = list(filter(None, text_split))
-    text_split = list(filter(lambda x: x != ' ', text_split))
+# Paso 8: Lematizar tokens
+def lematizar_tokens(tokens: list[str]) -> list[str]:
+  if len(tokens) == 0: return []
+  tokens_lematizados = []
+  for token in tokens:
+      doc = nlp(token)
+      # Obtener la primera palabra lematizada
+      lemma = doc[0].lemma_.split()[0]
+      tokens_lematizados.append(lemma)
+  return tokens_lematizados
 
-    return ' '.join(text_split)
+# Helper 1: Limpiar tokens
+# Ejemplo: ["Hola,", "", "¿cómo", "estás?"] -> ["Hola,", "¿cómo", "estás?"]
+def limpiar_tokens(tokens: list[str]) -> list[str]:
+  if len(tokens) == 0: return []
+  tokens_limpio = [token for token in tokens if token != '']
+  return tokens_limpio
 
-def delete_not_vocabulary_words(text: str) -> str:
-    """
-    Deletes non-vocabulary words from the given text.
+# Helper 2: Eliminar acentos
+# Ejemplo: ["Hóla", "¿cómo", "estás?"] -> ["Hola", "¿como", "estas?"]
+def eliminar_acentos(tokens: list[str]) -> list[str]:
+  if len(tokens) == 0: return []
+  tokens_copy = tokens.copy()
+  for i in range(len(tokens_copy)):
+    tokens_copy[i] = tokens_copy[i].replace('á', 'a').replace('Á', 'A').replace('ä', 'a').replace('Ä', 'A').replace('à', 'a').replace('À', 'A').replace('â', 'a').replace('Â', 'A')
+    tokens_copy[i] = tokens_copy[i].replace('é', 'e').replace('É', 'E').replace('ë', 'e').replace('Ë', 'E').replace('è', 'e').replace('È', 'E').replace('ê', 'e').replace('Ê', 'E')
+    tokens_copy[i] = tokens_copy[i].replace('í', 'i').replace('Í', 'I').replace('ï', 'i').replace('Ï', 'I').replace('ì', 'i').replace('Ì', 'I').replace('î', 'i').replace('Î', 'I')
+    tokens_copy[i] = tokens_copy[i].replace('ó', 'o').replace('Ó', 'O').replace('ö', 'o').replace('Ö', 'O').replace('ò', 'o').replace('Ò', 'O').replace('ô', 'o').replace('Ô', 'O')
+    tokens_copy[i] = tokens_copy[i].replace('ú', 'u').replace('Ú', 'U').replace('ü', 'u').replace('Ü', 'U').replace('ù', 'u').replace('Ù', 'U').replace('û', 'u').replace('Û', 'U')
+    tokens_copy[i] = tokens_copy[i].replace('ñ', 'n')
+  return tokens_copy
 
-    Args:
-        text (str): The input text.
-
-    Returns:
-        str: The text with non-vocabulary words removed.
-    """
-    text = text.lower()
-    regex = re.compile(r'[^a-z\s]')
-    text = re.sub(regex, '', text)
-    return text
-
-def delete_emojis(text: str) -> str:
-    """
-    Removes emojis from the given text.
-
-    Args:
-        text (str): The input text.
-
-    Returns:
-        str: The text with emojis removed.
-    """
-    text = emoji.replace_emoji(text, '')
-    return text
-
-def lemma(words: list[str]) -> list[str]:
-    """
-    Apply lemmatization to a list of words.
-
-    Args:
-        words (list[str]): The list of words to be lemmatized.
-
-    Returns:
-        list[str]: The lemmatized words.
-    """
-    if len(words) == 0:
-        return words
-    new_words = []
-    for word in words:
-        result = stNLP(word)
-        res = [word.lemma for sent in result.sentences for word in sent.words]
-        if len(res) == 0:
-            new_words.append(word)
-        else:
-            new_words.append(res[0])
-    return new_words
-
-def delete_stop_words(words: list[str]) -> list[str]:
-    """
-    Removes stop words from a list of words.
-
-    Args:
-        words (list[str]): The list of words to remove stop words from.
-
-    Returns:
-        list[str]: The list of words without stop words.
-    """
-    if len(words) == 0:
-        return words
-    tokens_without_stopwords = [word for word in words if not word in stop_words]
-    return tokens_without_stopwords
-
-def delete_duplicates(words: list[str]) -> list[str]:
-    """
-    Removes duplicate words from a list.
-
-    Args:
-        words (list[str]): A list of words.
-
-    Returns:
-        list[str]: A new list with duplicate words removed.
-    """
-    if len(words) == 0:
-        return words
-    return list(set(words))
+# Helper 3: Eliminar acentos pero solo para una palabra
+def eliminar_acentos_palabra(palabra: str) -> str:
+  palabra_limpia = palabra.replace('á', 'a').replace('Á', 'A').replace('ä', 'a').replace('Ä', 'A').replace('à', 'a').replace('À', 'A').replace('â', 'a').replace('Â', 'A')
+  palabra_limpia = palabra_limpia.replace('é', 'e').replace('É', 'E').replace('ë', 'e').replace('Ë', 'E').replace('è', 'e').replace('È', 'E').replace('ê', 'e').replace('Ê', 'E')
+  palabra_limpia = palabra_limpia.replace('í', 'i').replace('Í', 'I').replace('ï', 'i').replace('Ï', 'I').replace('ì', 'i').replace('Ì', 'I').replace('î', 'i').replace('Î', 'I')
+  palabra_limpia = palabra_limpia.replace('ó', 'o').replace('Ó', 'O').replace('ö', 'o').replace('Ö', 'O').replace('ò', 'o').replace('Ò', 'O').replace('ô', 'o').replace('Ô', 'O')
+  palabra_limpia = palabra_limpia.replace('ú', 'u').replace('Ú', 'U').replace('ü', 'u').replace('Ü', 'U').replace('ù', 'u').replace('Ù', 'U').replace('û', 'u').replace('Û', 'U')
+  palabra_limpia = palabra_limpia.replace('ñ', 'n')
+  return palabra_limpia
