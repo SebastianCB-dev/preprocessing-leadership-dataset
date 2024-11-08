@@ -4,7 +4,7 @@ import spacy
 
 stopwords_es = set(stopwords.words('spanish'))
 stopwords_en = set(stopwords.words('english'))
-nlp = spacy.load('assets/nlp_spacy/es_core_news_lg-3.1.0/es_core_news_lg/es_core_news_lg-3.1.0/')
+nlp = spacy.load('es_core_news_lg')
 
 # Función principal para preprocesar texto
 def preprocesar_texto(texto: str) -> list[str]:
