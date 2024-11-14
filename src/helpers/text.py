@@ -16,6 +16,8 @@ def preprocesar_texto(texto: str) -> list[str]:
   tokens = limitar_caracteres(tokens)
   tokens = eliminar_espacios(tokens)
   tokens = lematizar_tokens(tokens)
+  tokens = eliminar_tokens_cortos(tokens)
+  tokens = eliminar_tokens_repetidos(tokens)
   return tokens
 
 # Paso 1: Convertir el texto a minúsculas
@@ -87,6 +89,18 @@ def lematizar_tokens(tokens: list[str]) -> list[str]:
       lemma = doc[0].lemma_.split()[0]
       tokens_lematizados.append(lemma)
   return tokens_lematizados
+
+# Paso 9: Eliminar tokens con longitud menor a 3
+def eliminar_tokens_cortos(tokens: list[str]) -> list[str]:
+  if len(tokens) == 0: return []
+  tokens = [token for token in tokens if token != '']
+  tokens = [token for token in tokens if len(token) > 2]
+  return tokens
+
+# Paso 10: eliminar tokens repetidos
+def eliminar_tokens_repetidos(tokens: list[str]) -> list[str]:
+  tokens = list(dict.fromkeys(tokens))
+  return tokens
 
 # Helper 1: Limpiar tokens
 # Ejemplo: ["Hola,", "", "¿cómo", "estás?"] -> ["Hola,", "¿cómo", "estás?"]

@@ -17,12 +17,17 @@ class Preprocessing:
     df_preprocessed = df.copy()
     # Columna esta trabajando
     df_preprocessed['is_working'] = df_preprocessed['is_working'].apply(lambda x: 1 if x == True else 0)
-    # Preprocess text
-    texts = df_preprocessed[['first_question', 'second_question', 'third_question', 'fourth_question', 'fifth_question', 'sixth_question', 'seventh_question', 'eighth_question']]
-    for column in texts.columns:
-      df_preprocessed[column] = df_preprocessed[column].astype('str').apply(preprocesar_texto)
-    columns = ['first_question', 'second_question', 'third_question', 'fourth_question', 'fifth_question', 'sixth_question', 'seventh_question', 'eighth_question']
-    for i in range(0, 8):
-      df_preprocessed[columns[i]] = df_preprocessed[columns[i]].apply(lambda x: json.dumps(x))
+    # Define columns to join
+    text_columns = ["first_question", "second_question", "third_question", "fourth_question", "fifth_question", "sixth_question", "seventh_question", "eighth_question"]
+    num_rows = df_preprocessed.shape[0]
+    print(f"number of rows: {num_rows}")
+    for i in range(num_rows):
+      row = df_preprocessed.iloc[i]
+      row_texts = row[text_columns]
+      texts_joined = " ".join(row_texts.astype(str))
+      text_preprocessed = preprocesar_texto(texts_joined)
+      print(f"Text preprocessed: {text_preprocessed}")
+
+      print("--------------------------------")
 
     return df_preprocessed
