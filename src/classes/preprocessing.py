@@ -35,10 +35,15 @@ class Preprocessing:
       # Agregar los resultados como nuevas columnas al DataFrame
       for key, value in result.items():
         df_preprocessed.at[i, f'weight_{key}'] = value
-
       print(f"\033[1mProcesada fila {i+1} de {num_rows}\033[0m")
-      print(f"\033[91m{'-'*100}\033[0m")
       # Print a new line
+      print(f"\033[91m{'-'*100}\033[0m")
+    # Remove columns with text
+    df_preprocessed.drop(text_columns, axis=1, inplace=True)
+    # Mover la columna 'prediction' al final
+    if 'prediction' in df_preprocessed.columns:
+        columns = [col for col in df_preprocessed.columns if col != 'prediction'] + ['prediction']
+        df_preprocessed = df_preprocessed[columns]
     return df_preprocessed
 
   def getLeadershipWeights(self, tokens: list[str]) -> dict:
@@ -55,7 +60,7 @@ class Preprocessing:
           count_words += 1
         else:
           for value in ontology_column_values:
-            if textdistance.levenshtein.distance(value, token) <= 2:
+            if textdistance.levenshtein.normalized_similarity(token, value) > 0.7:
               count_words += 1
               break
       leadership_weights[column_name] = count_words / total_tokens if total_tokens > 0 else 0
